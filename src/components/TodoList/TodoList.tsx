@@ -1,5 +1,6 @@
 import React from 'react';
 import { Todo } from '../../types/Todo';
+import cx from 'classnames';
 
 type Props = {
   todos: Todo[];
@@ -28,7 +29,13 @@ export const TodoList: React.FC<Props> = ({
 
     <tbody>
       {todos.map(todo => (
-        <tr data-cy="todo" className="" key={todo.id}>
+        <tr
+          data-cy="todo"
+          key={todo.id}
+          className={cx({
+            'is-selected': todo.id === selectedTodoId,
+          })}
+        >
           <td className="is-vcentered">{todo.id}</td>
           {todo.completed ? (
             <td>

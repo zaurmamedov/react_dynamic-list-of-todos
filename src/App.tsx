@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import 'bulma/css/bulma.css';
@@ -8,28 +9,18 @@ import { TodoFilter } from './components/TodoFilter';
 import { TodoModal } from './components/TodoModal';
 import { Loader } from './components/Loader';
 
-import { getTodos, getUser } from './api';
+import { getTodos } from './api';
 import { Todo } from './types/Todo';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [selectedTodo, setselectedTodo] = useState<Todo | null>(null);
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [statusFilter, setStatusFilter] = useState<
   'all' | 'active' | 'completed'
   >('all');
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    if (todos.length > 0) {
-      for (const todo of todos) {
-        getUser(todo.userId).then(user => {
-          todo.user = user;
-        });
-      }
-    }
-  }, [todos]);
 
   useEffect(() => {
     setLoading(true);
@@ -80,7 +71,7 @@ export const App: React.FC = () => {
                 <TodoList
                   todos={visibleTodos}
                   selectedTodoId={selectedTodo?.id}
-                  onSelect={setselectedTodo}
+                  onSelect={setSelectedTodo}
                 />
               )}
 
@@ -94,8 +85,7 @@ export const App: React.FC = () => {
         <TodoModal
           todo={selectedTodo}
           selectedTodoId={selectedTodo.id}
-          onSelect={setselectedTodo}
-          loading={loading}
+          onSelect={setSelectedTodo}
         />
       )}
     </>

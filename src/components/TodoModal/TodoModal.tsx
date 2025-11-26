@@ -1,35 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { Loader } from '../Loader';
 import { Todo } from '../../types/Todo';
+import { getUser } from '../../api';
+import { User } from '../../types/User';
+import cx from 'classnames';
 
 type Props = {
   todo: Todo;
   selectedTodoId?: number;
   onSelect?: (todo: Todo | null) => void;
-  loading: boolean;
 };
 
 export const TodoModal: React.FC<Props> = ({
   todo,
   selectedTodoId,
   onSelect = () => {},
-  loading,
 }) => {
-  const [showLoader, setShowLoader] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    if (!loading) {
-      timer = setTimeout(() => setShowLoader(false), 500); // затримка
+    if (!todo) {
+      return;
     }
 
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [loading]);
+    setLoadingUser(true);
+    setError('');
+
+    getUser(todo.userId)
+      .then(setUser)
+      .catch(() => setError('Try again later'))
+      .finally(() => setLoadingUser(false));
+  }, [todo]);
 
   return (
     <div className="modal is-active" data-cy="modal">
@@ -53,25 +56,30 @@ export const TodoModal: React.FC<Props> = ({
         </header>
 
         <div className="modal-card-body">
-          {showLoader ? (
+          {loadingUser ? (
             <Loader />
+          ) : error ? (
+            <p className="has-text-danger" data-cy="modal-error">
+              {error}
+            </p>
           ) : (
             <>
               <p className="block" data-cy="modal-title">
                 {todo.title}
               </p>
               <p className="block" data-cy="modal-user">
-                {todo.completed ? (
-                  <strong className="has-text-success">Done</strong>
-                ) : (
-                  <strong className="has-text-danger">Planned</strong>
-                )}
+                <strong
+                  className={cx('status', {
+                    'has-text-success': todo.completed,
+                    'has-text-danger': !todo.completed,
+                  })}
+                >
+                  {todo.completed ? 'Done' : 'Planned'}
+                </strong>
 
                 {' by '}
 
-                {todo.user && (
-                  <a href={`mailto:${todo.user.email}`}>{todo.user.name}</a>
-                )}
+                {user && <a href={`mailto:${user.email}`}>{user.name}</a>}
               </p>
             </>
           )}
